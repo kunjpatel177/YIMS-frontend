@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import TransferCreateModal from './TransferCreateModal';
 import TransferDetailModal from './TransferDetailModal';
@@ -150,15 +150,32 @@ const TransferList = () => {
     });
   });
 
+  // Quick stats calculations
+  const totalTransfers = pagination?.total || transfers.length;
+  const completedCount = transfers.filter((t) => t.status === 'Completed').length;
+  const pendingCount = transfers.filter((t) => t.status === 'Pending').length;
+  const totalUnitsShifted = transfers.reduce(
+    (sum, t) => sum + (t.items ? t.items.reduce((s, it) => s + (Number(it.quantity) || 0), 0) : (Number(t.quantity) || 0)),
+    0
+  );
+
   return (
     <div className="d-flex flex-column gap-3">
       {/* Header */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <div>
-          <h4 className="fw-bold mb-1 text-dark">Warehouse Stock Transfers</h4>
-          <p className="text-secondary small mb-0">
-            Transfer raw materials and finished products between factory sheds and warehouses
-          </p>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div className="d-flex align-items-center gap-3">
+          <div className="page-header-icon bg-indigo text-white bg-lime-600 shadow-sm">
+            <i className="fas fa-dolly"></i>
+          </div>
+          <div>
+            <div className="d-flex align-items-center gap-2">
+              <h4 className="page-header-title mb-0">Warehouse Stock Transfers</h4>
+              <span className="page-context-pill">Logistics</span>
+            </div>
+            <p className="page-header-subtitle mb-0">
+              Transfer raw materials and finished products between factory sheds and warehouses
+            </p>
+          </div>
         </div>
         <div className="d-flex align-items-center gap-2">
           <ExportButtons
@@ -168,11 +185,54 @@ const TransferList = () => {
           />
           <button
             onClick={() => setShowCreateModal(true)}
-            className="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm"
+            className="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm px-3"
           >
             <i className="fas fa-plus"></i>
             <span>Initiate Transfer</span>
           </button>
+        </div>
+      </div>
+
+      {/* Quick Stats Ribbon */}
+      <div className="page-stats-ribbon">
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-gray-300 text-indigo">
+            <i className="fas fa-dolly"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{totalTransfers}</div>
+            <div className="stat-ribbon-lbl">Total Transfers</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-success-subtle text-success">
+            <i className="fas fa-circle-check"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{completedCount}</div>
+            <div className="stat-ribbon-lbl">Completed Transfers</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-warning-subtle text-warning">
+            <i className="fas fa-hourglass-half"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{pendingCount}</div>
+            <div className="stat-ribbon-lbl">Pending Execution</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-primary-subtle text-primary">
+            <i className="fas fa-boxes-stacked"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{totalUnitsShifted.toLocaleString()}</div>
+            <div className="stat-ribbon-lbl">Total Units Moved</div>
+          </div>
         </div>
       </div>
 
@@ -304,8 +364,7 @@ const TransferList = () => {
                   <th>Item(s) Transferred</th>
                   <th>Type</th>
                   <th className="text-center">Total Quantity</th>
-                  <th>From Warehouse</th>
-                  <th>To Warehouse</th>
+                  <th>Route (From &rarr; To)</th>
                   <th>Status</th>
                   <th className="text-end">Actions</th>
                 </tr>
@@ -325,7 +384,7 @@ const TransferList = () => {
                     <tr key={t._id}>
                       <td>
                         <button
-                          className="btn btn-link btn-sm fw-bold p-0 text-decoration-none text-primary"
+                          className="badge bg-light text-primary border font-monospace px-2 py-1 btn btn-link p-0 text-decoration-none"
                           onClick={() => {
                             setSelectedTransfer(t);
                             setShowDetailModal(true);
@@ -337,26 +396,26 @@ const TransferList = () => {
                       </td>
                       <td>{new Date(t.transferDate).toLocaleDateString()}</td>
                       <td>
-                        {hasMulti ? (
+                        <div className="d-flex align-items-center gap-2">
+                          <div className="table-item-avatar bg-indigo-subtle text-indigo flex-shrink-0">
+                            <i className="fas fa-boxes-packing"></i>
+                          </div>
                           <div>
-                            <div className="fw-semibold text-dark">
-                              {firstItemObj?.name || 'Item'}
-                              <span className="badge bg-primary-subtle text-primary border border-primary-subtle ms-1">
-                                +{t.items.length - 1} more
-                              </span>
-                            </div>
-                            <span className="badge bg-light text-dark border font-monospace">
+                            {hasMulti ? (
+                              <div>
+                                <span className="fw-semibold text-dark">{firstItemObj?.name || 'Item'}</span>
+                                <span className="badge bg-primary-subtle text-primary border border-primary-subtle ms-1">
+                                  +{t.items.length - 1} more
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="fw-semibold text-dark">{firstItemObj?.name || 'Item'}</div>
+                            )}
+                            <span className="badge bg-light text-dark border font-monospace" style={{ fontSize: '0.72rem' }}>
                               {firstItemObj?.sku || 'N/A'}
                             </span>
                           </div>
-                        ) : (
-                          <div>
-                            <div className="fw-semibold text-dark">{firstItemObj?.name || 'Item'}</div>
-                            <span className="badge bg-light text-dark border font-monospace">
-                              {firstItemObj?.sku || 'N/A'}
-                            </span>
-                          </div>
-                        )}
+                        </div>
                       </td>
                       <td>
                         {hasMulti ? (
@@ -377,38 +436,39 @@ const TransferList = () => {
                           </span>
                         )}
                       </td>
-                      <td className="text-center fw-bold fs-6 text-dark">
+                      <td className="text-center fw-bold fs-6 text-dark font-monospace">
                         {totalUnits.toLocaleString()}
                       </td>
                       <td>
-                        <span className="badge bg-light text-secondary border">
-                          {t.sourceWarehouse?.code} ({t.sourceWarehouse?.name})
-                        </span>
-                      </td>
-                      <td>
-                        <span className="badge bg-light text-primary border">
-                          {t.destinationWarehouse?.code} ({t.destinationWarehouse?.name})
-                        </span>
+                        <div className="d-flex align-items-center gap-1">
+                          <span className="badge bg-light text-secondary border font-monospace px-2 py-1" title={t.sourceWarehouse?.name}>
+                            {t.sourceWarehouse?.code}
+                          </span>
+                          <i className="fas fa-arrow-right text-muted fa-xs mx-1"></i>
+                          <span className="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace px-2 py-1" title={t.destinationWarehouse?.name}>
+                            {t.destinationWarehouse?.code}
+                          </span>
+                        </div>
                       </td>
                       <td>
                         <StatusBadge status={t.status} />
                       </td>
                       <td className="text-end">
-                        <div className="btn-group btn-group-sm">
+                        <div className="d-flex justify-content-end gap-1">
                           <button
-                            className="btn btn-outline-secondary"
+                            className="table-action-btn"
                             onClick={() => {
                               setSelectedTransfer(t);
                               setShowDetailModal(true);
                             }}
                             title="View Transfer Details"
                           >
-                            <i className="fas fa-eye"></i>
+                            <i className="fas fa-eye text-primary"></i>
                           </button>
                           {t.status === 'Pending' && (
                             <>
                               <button
-                                className="btn btn-outline-success"
+                                className="table-action-btn text-success"
                                 onClick={() => handleCompleteTransfer(t._id)}
                                 disabled={actionLoading}
                                 title="Execute Transfer & Shift Stock"
@@ -416,7 +476,7 @@ const TransferList = () => {
                                 <i className="fas fa-check"></i>
                               </button>
                               <button
-                                className="btn btn-outline-danger"
+                                className="table-action-btn text-danger"
                                 onClick={() => handleOpenCancel(t)}
                                 disabled={actionLoading}
                                 title="Cancel Transfer"

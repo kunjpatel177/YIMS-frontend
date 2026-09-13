@@ -113,12 +113,20 @@ const ReportsHub = () => {
   return (
     <div className="d-flex flex-column gap-3">
       {/* Header */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <div>
-          <h4 className="fw-bold mb-1 text-dark">Manufacturing & Inventory Reports</h4>
-          <p className="text-secondary small mb-0">
-            Comprehensive audit reports with exportable CSV, Excel, and PDF formats
-          </p>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div className="d-flex align-items-center gap-3">
+          <div className="page-header-icon bg-indigo text-white bg-gray-800 shadow-sm">
+            <i className="fas fa-chart-pie"></i>
+          </div>
+          <div>
+            <div className="d-flex align-items-center gap-2">
+              <h4 className="page-header-title mb-0">Manufacturing & Inventory Reports</h4>
+              <span className="page-context-pill">Analytics</span>
+            </div>
+            <p className="page-header-subtitle mb-0">
+              Comprehensive audit reports with exportable CSV, Excel, and PDF formats
+            </p>
+          </div>
         </div>
         <div className="d-flex align-items-center gap-2">
           <ExportButtons
@@ -131,10 +139,10 @@ const ReportsHub = () => {
       </div>
 
       {/* Report Navigation Tabs */}
-      <ul className="nav nav-pills border-bottom pb-2 flex-nowrap overflow-x-auto">
+      <ul className="segment-nav-tabs overflow-x-auto flex-nowrap justify-around">
         <li className="nav-item text-nowrap">
           <button
-            className={`nav-link btn-sm ${reportType === 'sales' ? 'active' : ''}`}
+            className={`nav-link ${reportType === 'sales' ? 'active' : ''}`}
             onClick={() => {
               setReportType('sales');
               setPage(1);
@@ -145,7 +153,7 @@ const ReportsHub = () => {
         </li>
         <li className="nav-item text-nowrap">
           <button
-            className={`nav-link btn-sm ${reportType === 'purchases' ? 'active' : ''}`}
+            className={`nav-link ${reportType === 'purchases' ? 'active' : ''}`}
             onClick={() => {
               setReportType('purchases');
               setPage(1);
@@ -156,7 +164,7 @@ const ReportsHub = () => {
         </li>
         <li className="nav-item text-nowrap">
           <button
-            className={`nav-link btn-sm ${reportType === 'inventory' ? 'active' : ''}`}
+            className={`nav-link ${reportType === 'inventory' ? 'active' : ''}`}
             onClick={() => {
               setReportType('inventory');
               setPage(1);
@@ -167,7 +175,7 @@ const ReportsHub = () => {
         </li>
         <li className="nav-item text-nowrap">
           <button
-            className={`nav-link btn-sm ${reportType === 'low-stock' ? 'active' : ''}`}
+            className={`nav-link ${reportType === 'low-stock' ? 'active' : ''}`}
             onClick={() => {
               setReportType('low-stock');
               setPage(1);
@@ -178,7 +186,7 @@ const ReportsHub = () => {
         </li>
         <li className="nav-item text-nowrap">
           <button
-            className={`nav-link btn-sm ${reportType === 'capacity' ? 'active' : ''}`}
+            className={`nav-link ${reportType === 'capacity' ? 'active' : ''}`}
             onClick={() => {
               setReportType('capacity');
               setPage(1);
@@ -189,7 +197,7 @@ const ReportsHub = () => {
         </li>
         <li className="nav-item text-nowrap">
           <button
-            className={`nav-link btn-sm ${reportType === 'transfers' ? 'active' : ''}`}
+            className={`nav-link ${reportType === 'transfers' ? 'active' : ''}`}
             onClick={() => {
               setReportType('transfers');
               setPage(1);
@@ -200,7 +208,7 @@ const ReportsHub = () => {
         </li>
         <li className="nav-item text-nowrap">
           <button
-            className={`nav-link btn-sm ${reportType === 'aluminium' ? 'active' : ''}`}
+            className={`nav-link ${reportType === 'aluminium' ? 'active' : ''}`}
             onClick={() => {
               setReportType('aluminium');
               setPage(1);
@@ -210,6 +218,49 @@ const ReportsHub = () => {
           </button>
         </li>
       </ul>
+
+      {/* Quick Stats Ribbon */}
+      <div className="page-stats-ribbon">
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-indigo-subtle text-indigo">
+            <i className="fas fa-database"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{total}</div>
+            <div className="stat-ribbon-lbl">Report Records</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-info-subtle text-info">
+            <i className="fas fa-table-columns"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{exportHeaders.length}</div>
+            <div className="stat-ribbon-lbl">Data Fields</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-success-subtle text-success">
+            <i className="fas fa-file-export"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">CSV &bull; Excel &bull; PDF</div>
+            <div className="stat-ribbon-lbl">Export Ready</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-primary-subtle text-primary">
+            <i className="fas fa-filter"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{warehouseId || status || startDate || endDate ? 'Filtered' : 'Complete View'}</div>
+            <div className="stat-ribbon-lbl">Scope Status</div>
+          </div>
+        </div>
+      </div>
 
       {/* Filters Bar */}
       <div className="card card-custom p-3">
@@ -284,9 +335,14 @@ const ReportsHub = () => {
 
       {/* Report Data Display Table */}
       <div className="card card-custom p-0 overflow-hidden">
-        <div className="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
-          <h6 className="fw-bold text-dark mb-0">{reportTitles[reportType]}</h6>
-          <span className="badge bg-secondary">{total} Total Records</span>
+        <div className="p-3 border-bottom d-flex justify-content-between align-items-center bg-light-subtle">
+          <div className="d-flex align-items-center gap-2">
+            <div className="table-item-avatar bg-indigo-subtle text-indigo flex-shrink-0" style={{ width: '28px', height: '28px' }}>
+              <i className="fas fa-table-list fa-xs"></i>
+            </div>
+            <h6 className="fw-bold text-dark mb-0">{reportTitles[reportType]}</h6>
+          </div>
+          <span className="badge bg-light text-dark border font-monospace px-2 py-1">{total} Records</span>
         </div>
 
         {loading ? (

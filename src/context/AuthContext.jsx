@@ -13,28 +13,37 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const verifyUser = async () => {
-      if (token) {
+      const savedToken = localStorage.getItem('yims_token');
+      if (savedToken) {
         try {
           const res = await api.get('/auth/me');
-          setUser(res.data.user);
-          localStorage.setItem('yims_user', JSON.stringify(res.data.user));
+          if (res.data?.user) {
+            setUser(res.data.user);
+            localStorage.setItem('yims_user', JSON.stringify(res.data.user));
+          }
         } catch (err) {
-          console.error('Session expired', err);
-          logout();
+          // Only clear session if explicitly unauthenticated (401)
+          if (err.response && err.response.status === 401) {
+            console.warn('Session expired (401), logging out');
+            logout();
+          } else {
+            console.warn('Could not verify session with server; retaining cached session', err.message);
+          }
         }
       }
       setLoading(false);
     };
     verifyUser();
-  }, [token]);
+  }, []);
 
   const login = async (email, password, rememberMe = false) => {
     const res = await api.post('/auth/login', { email, password, rememberMe });
     const { token: newToken, user: userData } = res.data;
-    setToken(newToken);
-    setUser(userData);
     localStorage.setItem('yims_token', newToken);
     localStorage.setItem('yims_user', JSON.stringify(userData));
+    setToken(newToken);
+    setUser(userData);
+    setLoading(false);
     return userData;
   };
 

@@ -194,12 +194,20 @@ const AluminiumHub = () => {
   return (
     <div className="d-flex flex-column gap-3">
       {/* Header */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <div>
-          <h4 className="fw-bold mb-1 text-dark">Aluminium Management & Production</h4>
-          <p className="text-secondary small mb-0">
-            Dedicated lifecycle tracking for core manufacturing aluminium, production conversion, and ledger
-          </p>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div className="d-flex align-items-center gap-3">
+          <div className="page-header-icon bg-warning text-dark shadow-sm">
+            <i className="fas fa-layer-group"></i>
+          </div>
+          <div>
+            <div className="d-flex align-items-center gap-2">
+              <h4 className="page-header-title mb-0">Aluminium Management & Production</h4>
+              <span className="page-context-pill">Ingot & Casting</span>
+            </div>
+            <p className="page-header-subtitle mb-0">
+              Dedicated lifecycle tracking for core manufacturing aluminium, production conversion, and audit ledger
+            </p>
+          </div>
         </div>
         <div className="d-flex align-items-center gap-2">
           {activeTab === 'ledger' && (
@@ -222,52 +230,83 @@ const AluminiumHub = () => {
       {/* KPI Balance Banner */}
       <div className="row g-3">
         <div className="col-12 col-sm-6 col-lg-3">
-          <div className="card card-custom p-3 bg-warning-subtle border border-warning-subtle">
-            <div className="text-dark small fw-semibold text-uppercase">Available Aluminium Balance</div>
-            <div className="fs-3 fw-bold text-dark mt-1">
-              {(currentAvailableGm / 1000).toFixed(2)} <span className="fs-6 fw-normal text-muted">kg</span>
+          <div className="quick-stat-card accent-warning">
+            <div className="stat-hdr">
+              <span className="stat-title">Available Aluminium Balance</span>
+              <div className="stat-icon bg-warning-subtle text-warning rounded my-1" style={{ width:"fit-content" }}>
+                <i className="fas fa-scale-balanced px-2 py-2"></i>
+              </div>
             </div>
-            <div className="small text-muted">{currentAvailableGm.toLocaleString()} gm base stock</div>
+            <div className="stat-val text-dark">
+              {(currentAvailableGm / 1000).toFixed(2)}{' '}
+              <span className="fs-6 fw-normal text-muted">kg</span>
+            </div>
+            <div className="stat-sub text-muted">
+              {currentAvailableGm.toLocaleString()} gm base stock
+            </div>
           </div>
         </div>
 
         <div className="col-12 col-sm-6 col-lg-3">
-          <div className="card card-custom p-3">
-            <div className="text-secondary small fw-semibold text-uppercase">Opening Stock</div>
-            <div className="fs-4 fw-bold text-dark mt-1">
-              {((inventory?.openingStockGm || 0) / 1000).toFixed(2)} <span className="fs-6 fw-normal text-muted">kg</span>
+          <div className="quick-stat-card accent-slate">
+            <div className="stat-hdr">
+              <span className="stat-title">Opening Stock</span>
+              <div className="stat-icon bg-secondary-subtle text-secondary rounded my-1" style={{ width:"fit-content" }}>
+                <i className="fas fa-boxes-stacked px-2 py-2"></i>
+              </div>
             </div>
-            <div className="small text-muted">{(inventory?.openingStockGm || 0).toLocaleString()} gm base</div>
+            <div className="stat-val text-dark">
+              {((inventory?.openingStockGm || 0) / 1000).toFixed(2)}{' '}
+              <span className="fs-6 fw-normal text-muted">kg</span>
+            </div>
+            <div className="stat-sub text-muted">
+              {((inventory?.openingStockGm || 0)).toLocaleString()} gm base
+            </div>
           </div>
         </div>
 
         <div className="col-12 col-sm-6 col-lg-3">
-          <div className="card card-custom p-3">
-            <div className="text-secondary small fw-semibold text-uppercase">Total Purchased</div>
-            <div className="fs-4 fw-bold text-info mt-1">
-              +{((inventory?.purchasedGm || 0) / 1000).toFixed(2)} <span className="fs-6 fw-normal text-muted">kg</span>
+          <div className="quick-stat-card accent-info">
+            <div className="stat-hdr">
+              <span className="stat-title">Total Purchased</span>
+              <div className="stat-icon bg-info-subtle text-info rounded my-1" style={{ width:"fit-content" }}>
+                <i className="fas fa-cart-flatbed px-2 py-2"></i>
+              </div>
             </div>
-            <div className="small text-muted">{(inventory?.purchasedGm || 0).toLocaleString()} gm procured</div>
+            <div className="stat-val text-info">
+              +{((inventory?.purchasedGm || 0) / 1000).toFixed(2)}{' '}
+              <span className="fs-6 fw-normal text-muted">kg</span>
+            </div>
+            <div className="stat-sub text-muted">
+              {((inventory?.purchasedGm || 0)).toLocaleString()} gm procured
+            </div>
           </div>
         </div>
 
         <div className="col-12 col-sm-6 col-lg-3">
-          <div className="card card-custom p-3">
-            <div className="text-secondary small fw-semibold text-uppercase">Production Used + Scrap</div>
-            <div className="fs-4 fw-bold text-danger mt-1">
+          <div className="quick-stat-card accent-danger">
+            <div className="stat-hdr">
+              <span className="stat-title">Production Used + Scrap</span>
+              <div className="stat-icon bg-danger-subtle text-danger rounded my-1" style={{ width:"fit-content" }}>
+                <i className="fas fa-fire-burner px-2 py-2"></i>
+              </div>
+            </div>
+            <div className="stat-val text-danger">
               -{(((inventory?.usedGm || 0) + (inventory?.wastageGm || 0)) / 1000).toFixed(2)}{' '}
               <span className="fs-6 fw-normal text-muted">kg</span>
             </div>
-            <div className="small text-danger">{(inventory?.wastageGm || 0).toLocaleString()} gm scrap</div>
+            <div className="stat-sub text-danger">
+              {((inventory?.wastageGm || 0)).toLocaleString()} gm scrap
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <ul className="nav nav-pills border-bottom pb-2">
+      {/* Segmented Tabs */}
+      <ul className="segment-nav-tabs list-unstyled">
         <li className="nav-item">
           <button
-            className={`nav-link btn-sm ${activeTab === 'production' ? 'active' : ''}`}
+            className={`nav-link ${activeTab === 'production' ? 'active' : ''}`}
             onClick={() => setActiveTab('production')}
           >
             <i className="fas fa-hammer me-1"></i> Aluminium Production Form
@@ -275,7 +314,7 @@ const AluminiumHub = () => {
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link btn-sm ${activeTab === 'history' ? 'active' : ''}`}
+            className={`nav-link ${activeTab === 'history' ? 'active' : ''}`}
             onClick={() => {
               setActiveTab('history');
               setHistoryPage(1);
@@ -286,7 +325,7 @@ const AluminiumHub = () => {
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link btn-sm ${activeTab === 'ledger' ? 'active' : ''}`}
+            className={`nav-link ${activeTab === 'ledger' ? 'active' : ''}`}
             onClick={() => {
               setActiveTab('ledger');
               setLedgerPage(1);
@@ -525,9 +564,18 @@ const AluminiumHub = () => {
                 <tbody>
                   {productions.map((p) => (
                     <tr key={p._id}>
-                      <td className="fw-semibold text-primary">{p.productionNumber}</td>
+                      <td>
+                        <span className="badge bg-light text-primary border font-monospace px-2 py-1">{p.productionNumber}</span>
+                      </td>
                       <td>{new Date(p.productionDate).toLocaleDateString()}</td>
-                      <td className="fw-semibold text-dark">{p.rawMaterial?.name}</td>
+                      <td>
+                        <div className="d-flex align-items-center gap-2">
+                          <div className="table-item-avatar bg-warning-subtle text-dark flex-shrink-0">
+                            <i className="fas fa-layer-group"></i>
+                          </div>
+                          <span className="fw-semibold text-dark">{p.rawMaterial?.name}</span>
+                        </div>
+                      </td>
                       <td className="text-center fw-bold">
                         {p.productionQuantity} {p.rawMaterial?.unit}
                       </td>
@@ -544,7 +592,7 @@ const AluminiumHub = () => {
                         </span>
                       </td>
                       <td>
-                        <span className="badge bg-success text-white">Completed</span>
+                        <span className="badge bg-success-subtle text-success border border-success-subtle">Completed</span>
                       </td>
                     </tr>
                   ))}
@@ -611,7 +659,9 @@ const AluminiumHub = () => {
                     {ledger.map((l) => (
                       <tr key={l._id}>
                         <td>{new Date(l.date).toLocaleDateString()}</td>
-                        <td className="fw-semibold text-primary">{l.transactionNumber}</td>
+                        <td>
+                          <span className="badge bg-light text-primary border font-monospace px-2 py-1">{l.transactionNumber}</span>
+                        </td>
                         <td>
                           <span
                             className={`badge ${

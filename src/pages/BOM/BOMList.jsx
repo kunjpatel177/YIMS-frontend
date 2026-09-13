@@ -180,12 +180,20 @@ const BOMList = () => {
   return (
     <div className="d-flex flex-column gap-3">
       {/* Header */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <div>
-          <h4 className="fw-bold mb-1 text-dark">Bill of Materials (BOM) & Today's Availability</h4>
-          <p className="text-secondary small mb-0">
-            Product recipes, component bottleneck formulas, and production capacity calculations
-          </p>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div className="d-flex align-items-center gap-3">
+          <div className="page-header-icon bg-gray-700 text-white shadow-sm">
+            <i className="fas fa-diagram-project"></i>
+          </div>
+          <div>
+            <div className="d-flex align-items-center gap-2">
+              <h4 className="page-header-title mb-0">Bill of Materials & Capacity</h4>
+              <span className="page-context-pill">Manufacturing</span>
+            </div>
+            <p className="page-header-subtitle mb-0">
+              Product recipes, component bottleneck formulas, and production capacity calculations
+            </p>
+          </div>
         </div>
         <div className="d-flex align-items-center gap-2">
           {activeTab === 'explorer' ? (
@@ -206,13 +214,13 @@ const BOMList = () => {
             <>
               <button
                 onClick={() => setShowDuplicateModal(true)}
-                className="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+                className="btn btn-outline-primary btn-sm d-flex align-items-center gap-1 shadow-sm px-3"
                 title="Clone BOM recipe to another product"
               >
                 <i className="fas fa-copy"></i>
                 <span>Duplicate BOM</span>
               </button>
-              <button onClick={handleOpenAdd} className="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm">
+              <button onClick={handleOpenAdd} className="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm px-3">
                 <i className="fas fa-plus"></i>
                 <span>Add Component</span>
               </button>
@@ -221,11 +229,11 @@ const BOMList = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <ul className="nav nav-pills border-bottom pb-2">
+      {/* Segmented Tabs */}
+      <ul className="segment-nav-tabs list-unstyled">
         <li className="nav-item">
           <button
-            className={`nav-link btn-sm ${activeTab === 'explorer' ? 'active' : ''}`}
+            className={`nav-link ${activeTab === 'explorer' ? 'active' : ''}`}
             onClick={() => setActiveTab('explorer')}
           >
             <i className="fas fa-diagram-project me-1"></i> Product BOM & Capacity Bottlenecks
@@ -233,10 +241,10 @@ const BOMList = () => {
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link btn-sm ${activeTab === 'availability' ? 'active' : ''}`}
+            className={`nav-link ${activeTab === 'availability' ? 'active' : ''}`}
             onClick={() => setActiveTab('availability')}
           >
-            <i className="fas fa-boxes-packing me-1"></i> Today's Availability Matrix (All Products)
+            <i className="fas fa-boxes-packing me-1"></i> Today's Availability Matrix
           </button>
         </li>
       </ul>
@@ -245,17 +253,19 @@ const BOMList = () => {
         <div className="d-flex flex-column gap-3">
           {/* Product Selector Card */}
           <div className="card card-custom p-3">
-            <div className="row g-2 align-items-center">
+            <div className="row g-3 align-items-center">
               <div className="col-12 col-md-5">
-                <label className="form-label small fw-semibold text-secondary mb-1">Select Product to Inspect BOM</label>
+                <label className="form-label small fw-semibold text-secondary mb-1">
+                  <i className="fas fa-cube me-1 text-primary"></i> Select Product to Inspect BOM
+                </label>
                 <select
-                  className="form-select"
+                  className="form-select form-select-sm"
                   value={selectedProductId}
                   onChange={(e) => setSelectedProductId(e.target.value)}
                 >
                   {products.map((p) => (
                     <option key={p._id} value={p._id}>
-                      {p.name} ({p.sku}) - {p.category}
+                      {p.name} ({p.sku}) &bull; {p.category}
                     </option>
                   ))}
                 </select>
@@ -264,31 +274,41 @@ const BOMList = () => {
               {/* Live Bottleneck Formula Card */}
               {productBOMData && (
                 <div className="col-12 col-md-7">
-                  <div className="p-3 bg-light rounded-3 border d-flex flex-wrap align-items-center justify-content-between gap-2">
-                    <div>
-                      <div className="text-secondary small fw-semibold">"How Many Can Be Made?" (Bottleneck)</div>
-                      <div className="fs-3 fw-bold text-success">
-                        {productBOMData.capacityAnalysis?.capacity || 0}{' '}
-                        <span className="fs-6 fw-normal text-muted">units</span>
+                  <div className="card p-3 border-0 bg-light-subtle rounded-3 shadow-none border">
+                    <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                      <div>
+                        <div className="text-secondary small fw-semibold d-flex align-items-center gap-1">
+                          <i className="fas fa-bolt text-warning"></i>
+                          <span>Max Can Be Made (Bottleneck)</span>
+                        </div>
+                        <div className="fs-3 fw-bold text-success mt-1">
+                          {(productBOMData.capacityAnalysis?.capacity || 0).toLocaleString()}{' '}
+                          <span className="fs-6 fw-normal text-muted">units</span>
+                        </div>
                       </div>
-                    </div>
 
-                    {productBOMData.capacityAnalysis?.bottleneckMaterial ? (
-                      <div className="text-end">
-                        <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
-                          <i className="fas fa-triangle-exclamation me-1"></i> Bottleneck Component
-                        </span>
-                        <div className="fw-semibold text-dark mt-1">
-                          {productBOMData.capacityAnalysis.bottleneckMaterial.name}
+                      {productBOMData.capacityAnalysis?.bottleneckMaterial ? (
+                        <div className="text-end">
+                          <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                            <i className="fas fa-triangle-exclamation me-1"></i> Limiting Component
+                          </span>
+                          <div className="fw-semibold text-dark mt-1">
+                            {productBOMData.capacityAnalysis.bottleneckMaterial.name}
+                          </div>
+                          <div className="small text-muted font-monospace">
+                            In Stock: {productBOMData.capacityAnalysis.bottleneckMaterial.availableStock} &bull; Limits to{' '}
+                            {productBOMData.capacityAnalysis.bottleneckMaterial.canMake} units
+                          </div>
                         </div>
-                        <div className="small text-muted">
-                          Available: {productBOMData.capacityAnalysis.bottleneckMaterial.availableStock} / Limit:{' '}
-                          {productBOMData.capacityAnalysis.bottleneckMaterial.canMake} units
+                      ) : (
+                        <div className="text-end">
+                          <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                            <i className="fas fa-circle-check me-1"></i> No Capacity Bottlenecks
+                          </span>
+                          <div className="small text-muted mt-1">All raw components available</div>
                         </div>
-                      </div>
-                    ) : (
-                      <span className="badge bg-secondary-subtle text-secondary">No raw material limits</span>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -322,7 +342,7 @@ const BOMList = () => {
                       <th className="text-center">Can Produce</th>
                       <th>Uses Aluminium</th>
                       <th>Bottleneck</th>
-                      <th className="text-end">Actions</th>
+                      <th className="text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -334,13 +354,20 @@ const BOMList = () => {
                       );
 
                       return (
-                        <tr key={m.rawMaterialId} className={isBottleneck ? 'table-warning' : ''}>
+                        <tr key={m.rawMaterialId} className={isBottleneck ? 'table-warning-subtle' : ''}>
                           <td>
-                            <div className="fw-semibold text-dark">{m.rawMaterialName}</div>
-                            {bomEntry?.notes && <div className="small text-muted">{bomEntry.notes}</div>}
+                            <div className="d-flex align-items-center gap-1">
+                              <div className="table-item-avatar bg-indigo-subtle text-indigo shrink-0">
+                                <i className="fas fa-cube"></i>
+                              </div>
+                              <div>
+                                <div className="fw-semibold text-dark">{m.rawMaterialName}</div>
+                                {bomEntry?.notes && <div className="small text-muted">{bomEntry.notes}</div>}
+                              </div>
+                            </div>
                           </td>
                           <td>
-                            <span className="badge bg-light text-dark border font-monospace">{m.sku}</span>
+                            <span className="badge-custom bg-light text-dark border font-monospace px-2 py-2">{m.sku}</span>
                           </td>
                           <td className="text-center fw-bold">
                             {m.requiredPerUnit} <span className="small text-muted">{m.unit}</span>
@@ -349,7 +376,7 @@ const BOMList = () => {
                             {m.availableStock.toLocaleString()}
                           </td>
                           <td className="text-center">
-                            <span className={`badge ${isBottleneck ? 'bg-danger' : 'bg-success-subtle text-success'} px-2 py-1`}>
+                            <span className={`badge ${isBottleneck ? 'bg-danger text-white' : 'bg-success-subtle text-success'} px-2 py-1`}>
                               {m.canMakeUnits.toLocaleString()} units
                             </span>
                           </td>
@@ -368,22 +395,22 @@ const BOMList = () => {
                                 <i className="fas fa-circle-exclamation me-1"></i> Bottleneck
                               </span>
                             ) : (
-                              <span className="text-muted small">OK</span>
+                              <span className="badge bg-success-subtle text-success border">Normal</span>
                             )}
                           </td>
                           <td className="text-end">
-                            <div className="btn-group btn-group-sm">
+                            <div className="d-flex justify-content-end gap-1">
                               {bomEntry && (
                                 <>
                                   <button
-                                    className="btn btn-outline-secondary"
+                                    className="table-action-btn"
                                     onClick={() => handleOpenEdit(bomEntry)}
                                     title="Edit Quantity"
                                   >
-                                    <i className="fas fa-pencil"></i>
+                                    <i className="fas fa-pencil text-secondary"></i>
                                   </button>
                                   <button
-                                    className="btn btn-outline-danger"
+                                    className="table-action-btn text-danger"
                                     onClick={() => handleOpenDelete(bomEntry)}
                                     title="Remove from BOM"
                                   >
@@ -477,17 +504,26 @@ const BOMList = () => {
                         <th className="text-center">Can Be Made (BOM)</th>
                         <th className="text-center">Total Supply Potential</th>
                         <th>Limiting / Bottleneck Material</th>
-                        <th className="text-end">Action</th>
+                        <th className="text-start">Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       {paginatedCapacity.map((item) => (
                         <tr key={item.productId}>
-                          <td className="fw-semibold text-dark">{item.productName}</td>
                           <td>
-                            <span className="badge bg-light text-dark border font-monospace">{item.sku}</span>
+                            <div className="d-flex align-items-center gap-2">
+                              <div className="table-item-avatar bg-primary-subtle text-primary shrink-0">
+                                <i className="fas fa-box"></i>
+                              </div>
+                              <span className="fw-semibold text-dark">{item.productName}</span>
+                            </div>
                           </td>
-                          <td>{item.category}</td>
+                          <td>
+                            <span className="badge-custom bg-light text-dark border font-monospace px-2 py-1">{item.sku}</span>
+                          </td>
+                          <td>
+                            <span className="badge bg-secondary-subtle text-secondary px-2 py-1">{item.category}</span>
+                          </td>
                           <td className="text-center fw-semibold text-primary">
                             {item.finishedStock.toLocaleString()}
                           </td>
@@ -523,13 +559,13 @@ const BOMList = () => {
                           </td>
                           <td className="text-end">
                             <button
-                              className="btn btn-outline-primary btn-sm"
+                              className="btn btn-outline-primary btn-sm rounded-pill px-3"
                               onClick={() => {
                                 setSelectedProductId(item.productId);
                                 setActiveTab('explorer');
                               }}
                             >
-                              Inspect BOM
+                              <i className="fas fa-eye me-1"></i> Inspect
                             </button>
                           </td>
                         </tr>

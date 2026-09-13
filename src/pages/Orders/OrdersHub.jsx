@@ -234,15 +234,40 @@ const OrdersHub = () => {
     'Notes': a.notes || ''
   }));
 
+  // Quick stats calculations
+  const totalCount = pagination?.total || (activeTab === 'ALUMINIUM' ? aluPurchases.length : orders.length);
+  const completedCount = activeTab === 'ALUMINIUM'
+    ? aluPurchases.filter((a) => a.status === 'Completed').length
+    : orders.filter((o) => o.status === 'Completed').length;
+  const pendingCount = activeTab === 'ALUMINIUM'
+    ? aluPurchases.filter((a) => a.status === 'Pending').length
+    : orders.filter((o) => o.status === 'Pending').length;
+  const totalSummaryVal = activeTab === 'ALUMINIUM'
+    ? `${(aluPurchases.reduce((acc, a) => acc + (Number(a.quantityGm) || 0), 0) / 1000).toFixed(1)} kg`
+    : `₹ ${orders.reduce((acc, o) => acc + (Number(o.totalAmount) || 0), 0).toLocaleString()}`;
+  const totalSummaryLabel = activeTab === 'ALUMINIUM' ? 'Total Ingot Procured' : 'Volume Invoiced';
+
+  const headerIcon = activeTab === 'SALE' ? 'fa-cart-shopping' : activeTab === 'PURCHASE' ? 'fa-truck-ramp-box' : 'fa-layer-group';
+  const headerBg = activeTab === 'SALE' ? 'bg-primary text-white' : activeTab === 'PURCHASE' ? 'bg-info text-white' : 'bg-warning text-dark';
+  const contextPill = activeTab === 'SALE' ? 'Sales Invoicing' : activeTab === 'PURCHASE' ? 'Procurement' : 'Aluminium Purchase';
+
   return (
     <div className="d-flex flex-column gap-3">
       {/* Header */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <div>
-          <h4 className="fw-bold mb-1 text-dark">Orders Management</h4>
-          <p className="text-secondary small mb-0">
-            Fulfill sale deliveries, procure raw materials, and manage raw aluminium stock
-          </p>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div className="d-flex align-items-center gap-3">
+          <div className={`page-header-icon ${headerBg} shadow-sm`}>
+            <i className={`fas ${headerIcon}`}></i>
+          </div>
+          <div>
+            <div className="d-flex align-items-center gap-2">
+              <h4 className="page-header-title mb-0">Orders & Fulfillment Hub</h4>
+              <span className="page-context-pill">{contextPill}</span>
+            </div>
+            <p className="page-header-subtitle mb-0">
+              Fulfill sale dispatches, procure raw materials, and log aluminium deliveries
+            </p>
+          </div>
         </div>
         <div className="d-flex align-items-center gap-2">
           {activeTab === 'ALUMINIUM' ? (
@@ -254,7 +279,7 @@ const OrdersHub = () => {
               />
               <button
                 onClick={() => setShowAluModal(true)}
-                className="btn btn-warning btn-sm d-flex align-items-center gap-1 shadow-sm text-dark fw-semibold"
+                className="btn btn-warning btn-sm d-flex align-items-center gap-1 shadow-sm text-dark fw-semibold px-3"
               >
                 <i className="fas fa-layer-group"></i>
                 <span>Buy Aluminium</span>
@@ -269,7 +294,7 @@ const OrdersHub = () => {
               />
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm"
+                className="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm px-3"
               >
                 <i className="fas fa-plus"></i>
                 <span>Create {activeTab === 'SALE' ? 'Sale Order' : 'Purchase Order'}</span>
@@ -279,11 +304,11 @@ const OrdersHub = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <ul className="nav nav-pills border-bottom pb-2">
+      {/* Segmented Navigation Tabs */}
+      <ul className="segment-nav-tabs">
         <li className="nav-item">
           <button
-            className={`nav-link btn-sm ${activeTab === 'SALE' ? 'active' : ''}`}
+            className={`nav-link ${activeTab === 'SALE' ? 'active' : ''}`}
             onClick={() => {
               setActiveTab('SALE');
               setPage(1);
@@ -294,7 +319,7 @@ const OrdersHub = () => {
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link btn-sm ${activeTab === 'PURCHASE' ? 'active' : ''}`}
+            className={`nav-link ${activeTab === 'PURCHASE' ? 'active' : ''}`}
             onClick={() => {
               setActiveTab('PURCHASE');
               setPage(1);
@@ -305,7 +330,7 @@ const OrdersHub = () => {
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link btn-sm ${activeTab === 'ALUMINIUM' ? 'active' : ''}`}
+            className={`nav-link ${activeTab === 'ALUMINIUM' ? 'active' : ''}`}
             onClick={() => {
               setActiveTab('ALUMINIUM');
               setPage(1);
@@ -315,6 +340,49 @@ const OrdersHub = () => {
           </button>
         </li>
       </ul>
+
+      {/* Quick Stats Ribbon */}
+      <div className="page-stats-ribbon">
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-primary-subtle text-primary">
+            <i className="fas fa-receipt"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{totalCount}</div>
+            <div className="stat-ribbon-lbl">Total Records</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-success-subtle text-success">
+            <i className="fas fa-circle-check"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{completedCount}</div>
+            <div className="stat-ribbon-lbl">Completed</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-warning-subtle text-warning">
+            <i className="fas fa-hourglass-half"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{pendingCount}</div>
+            <div className="stat-ribbon-lbl">Pending Action</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-info-subtle text-info">
+            <i className="fas fa-coins"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{totalSummaryVal}</div>
+            <div className="stat-ribbon-lbl">{totalSummaryLabel}</div>
+          </div>
+        </div>
+      </div>
 
       {/* Filters Card */}
       <div className="card card-custom p-3">
@@ -438,24 +506,35 @@ const OrdersHub = () => {
                     <th className="text-center">Base Stock (gm)</th>
                     <th className="text-end">Total Cost</th>
                     <th>Status</th>
-                    <th className="text-end">Actions</th>
+                    <th className="text-start">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {aluPurchases.map((a) => (
                     <tr key={a._id}>
-                      <td className="fw-semibold text-primary">{a.purchaseNumber}</td>
+                      <td>
+                        <span className="badge bg-light text-primary border font-monospace px-2 py-1">
+                          {a.purchaseNumber}
+                        </span>
+                      </td>
                       <td>{new Date(a.purchaseDate).toLocaleDateString()}</td>
-                      <td>{a.supplier || 'Standard Supplier'}</td>
+                      <td>
+                        <div className="d-flex align-items-center gap-2">
+                          <div className="table-item-avatar bg-warning-subtle text-dark flex-shrink-0">
+                            <i className="fas fa-layer-group"></i>
+                          </div>
+                          <span className="fw-semibold text-dark">{a.supplier || 'Standard Supplier'}</span>
+                        </div>
+                      </td>
                       <td className="text-center fw-bold">
                         {a.quantityInput} <span className="small text-muted">{a.unitInput}</span>
                       </td>
                       <td className="text-center">
-                        <span className="badge bg-warning-subtle text-dark border border-warning-subtle font-monospace">
+                        <span className="badge bg-warning-subtle text-dark border border-warning-subtle font-monospace px-2 py-1">
                           +{a.quantityGm.toLocaleString()} gm
                         </span>
                       </td>
-                      <td className="text-end fw-semibold text-dark">
+                      <td className="text-end fw-semibold text-dark font-monospace">
                         {a.totalCost ? `₹ ${Number(a.totalCost).toLocaleString()}` : '-'}
                       </td>
                       <td>
@@ -464,7 +543,7 @@ const OrdersHub = () => {
                       <td className="text-end">
                         {a.status === 'Pending' && (
                           <button
-                            className="btn btn-success btn-sm d-inline-flex align-items-center gap-1"
+                            className="btn btn-success btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-1 shadow-sm"
                             onClick={() => handleCompleteAluPurchase(a._id)}
                             disabled={actionLoading}
                           >
@@ -511,48 +590,56 @@ const OrdersHub = () => {
                     <tr key={ord._id}>
                       <td>
                         <button
-                          className="btn btn-link btn-sm fw-bold p-0 text-decoration-none text-primary"
+                          className="badge bg-light text-primary border font-monospace px-2 py-1 btn btn-link p-0 text-decoration-none"
                           onClick={() => {
                             setSelectedOrderId(ord._id);
                             setShowDetailModal(true);
                           }}
+                          title="Click to view details"
                         >
                           {ord.orderNumber}
                         </button>
                       </td>
                       <td>{new Date(ord.orderDate).toLocaleDateString()}</td>
                       <td>
-                        <span className="badge bg-light text-dark border">{ord.warehouse?.code}</span>{' '}
+                        <span className="badge bg-light text-dark border font-monospace me-1">{ord.warehouse?.code}</span>
                         <span className="small text-secondary">{ord.warehouse?.name}</span>
                       </td>
-                      <td className="text-dark">{ord.partyName || '-'}</td>
+                      <td>
+                        <div className="d-flex align-items-center gap-2">
+                          <div className="table-item-avatar bg-primary-subtle text-primary flex-shrink-0">
+                            <i className="fas fa-building"></i>
+                          </div>
+                          <span className="fw-semibold text-dark">{ord.partyName || '-'}</span>
+                        </div>
+                      </td>
                       <td className="text-center">
-                        <span className="badge bg-light text-secondary border">
+                        <span className="badge bg-secondary-subtle text-secondary px-2 py-1">
                           {ord.items?.length || 0} line(s)
                         </span>
                       </td>
-                      <td className="text-end fw-semibold text-dark">
+                      <td className="text-end fw-bold text-dark font-monospace">
                         ₹ {Number(ord.totalAmount || 0).toLocaleString()}
                       </td>
                       <td>
                         <StatusBadge status={ord.status} />
                       </td>
                       <td className="text-end">
-                        <div className="btn-group btn-group-sm">
+                        <div className="d-flex justify-content-end gap-1">
                           <button
-                            className="btn btn-outline-secondary"
+                            className="table-action-btn"
                             onClick={() => {
                               setSelectedOrderId(ord._id);
                               setShowDetailModal(true);
                             }}
                             title="View Order Details"
                           >
-                            <i className="fas fa-eye"></i>
+                            <i className="fas fa-eye text-primary"></i>
                           </button>
                           {ord.status === 'Pending' && (
                             <>
                               <button
-                                className="btn btn-outline-success"
+                                className="table-action-btn text-success"
                                 onClick={() => handleCompleteOrder(ord._id)}
                                 disabled={actionLoading}
                                 title="Mark Completed (Update Warehouse Stock)"
@@ -560,7 +647,7 @@ const OrdersHub = () => {
                                 <i className="fas fa-check"></i>
                               </button>
                               <button
-                                className="btn btn-outline-danger"
+                                className="table-action-btn text-danger"
                                 onClick={() => handleOpenCancel(ord)}
                                 disabled={actionLoading}
                                 title="Cancel Order"

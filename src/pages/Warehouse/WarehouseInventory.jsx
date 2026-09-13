@@ -90,12 +90,20 @@ const WarehouseInventory = () => {
   return (
     <div className="d-flex flex-column gap-3">
       {/* Header */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <div>
-          <h4 className="fw-bold mb-1 text-dark">Warehouse Stock Balances</h4>
-          <p className="text-secondary small mb-0">
-            Multi-location inventory tracking across manufacturing sheds and distribution facilities
-          </p>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div className="d-flex align-items-center gap-3">
+          <div className="page-header-icon bg-info text-white shadow-sm">
+            <i className="fas fa-warehouse"></i>
+          </div>
+          <div>
+            <div className="d-flex align-items-center gap-2">
+              <h4 className="page-header-title mb-0">Warehouse Stock Balances</h4>
+              <span className="page-context-pill">Multi-Facility</span>
+            </div>
+            <p className="page-header-subtitle mb-0">
+              Multi-location inventory tracking across manufacturing sheds and distribution facilities
+            </p>
+          </div>
         </div>
         <div className="d-flex align-items-center gap-2">
           <ExportButtons
@@ -224,10 +232,10 @@ const WarehouseInventory = () => {
       <div className="card card-custom p-3">
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
           {/* Item Type Switcher */}
-          <div className="btn-group btn-group-sm" role="group">
+          <div className="btn-group btn-group-sm p-1 bg-light rounded-pill border" role="group">
             <button
               type="button"
-              className={`btn ${itemType === 'Product' ? 'btn-primary' : 'btn-outline-secondary'}`}
+              className={`btn btn-sm rounded-pill px-3 ${itemType === 'Product' ? 'btn-primary shadow-sm' : 'btn-light text-secondary border-0'}`}
               onClick={() => {
                 setItemType('Product');
                 setPage(1);
@@ -237,7 +245,7 @@ const WarehouseInventory = () => {
             </button>
             <button
               type="button"
-              className={`btn ${itemType === 'RawMaterial' ? 'btn-primary' : 'btn-outline-secondary'}`}
+              className={`btn btn-sm rounded-pill px-3 ${itemType === 'RawMaterial' ? 'btn-primary shadow-sm' : 'btn-light text-secondary border-0'}`}
               onClick={() => {
                 setItemType('RawMaterial');
                 setPage(1);
@@ -249,19 +257,19 @@ const WarehouseInventory = () => {
 
           {/* Search bar */}
           <form onSubmit={handleSearchSubmit} className="d-flex gap-2">
-            <div className="input-group input-group-sm" style={{ maxWidth: '300px' }}>
+            <div className="input-group input-group-sm" style={{ minWidth: '260px' }}>
               <span className="input-group-text bg-light text-secondary">
                 <i className="fas fa-search"></i>
               </span>
               <input
                 type="text"
                 className="form-control"
-                placeholder="Search items in facility..."
+                placeholder={`Search ${itemType === 'Product' ? 'products' : 'raw materials'}...`}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <button type="submit" className="btn btn-primary btn-sm">
+            <button type="submit" className="btn btn-primary btn-sm px-3">
               Search
             </button>
             {search && (
@@ -308,17 +316,29 @@ const WarehouseInventory = () => {
               <tbody>
                 {inventoryList.map((inv) => {
                   const available = Math.max(0, inv.currentStock - inv.reservedStock);
+                  const isProd = inv.itemType === 'Product';
                   return (
                     <tr key={inv._id}>
-                      <td className="fw-semibold text-dark">{inv.item?.name || 'Deleted Item'}</td>
                       <td>
-                        <span className="badge bg-light text-dark border font-monospace">
+                        <div className="d-flex align-items-center gap-2">
+                          <div className={`table-item-avatar ${isProd ? 'bg-primary-subtle text-primary' : 'bg-info-subtle text-info'} flex-shrink-0`}>
+                            <i className={`fas ${isProd ? 'fa-box' : 'fa-cube'}`}></i>
+                          </div>
+                          <span className="fw-semibold text-dark">{inv.item?.name || 'Deleted Item'}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="badge bg-light text-dark border font-monospace px-2 py-1">
                           {inv.item?.sku || 'N/A'}
                         </span>
                       </td>
-                      <td>{inv.item?.category || '-'}</td>
+                      <td>
+                        <span className="badge bg-secondary-subtle text-secondary px-2 py-1">
+                          {inv.item?.category || '-'}
+                        </span>
+                      </td>
                       <td className="text-center fw-bold fs-6 text-dark">{inv.currentStock.toLocaleString()}</td>
-                      <td className="text-center text-muted">{inv.reservedStock.toLocaleString()}</td>
+                      <td className="text-center text-muted font-monospace">{inv.reservedStock.toLocaleString()}</td>
                       <td className="text-center">
                         <span
                           className={`badge ${

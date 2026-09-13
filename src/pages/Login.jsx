@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
@@ -8,8 +8,15 @@ const Login = () => {
   const [password, setPassword] = useState('admin123');
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+  // If already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,9 +29,9 @@ const Login = () => {
       setLoading(true);
       await login(email, password, rememberMe);
       toast.success('Welcome back to YIMS!');
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (err) {
-      const msg = err.response?.data?.message || 'Login failed. Please check your credentials.';
+      const msg = err.response?.data?.message || err.message || 'Login failed. Please check your credentials.';
       toast.error(msg);
     } finally {
       setLoading(false);

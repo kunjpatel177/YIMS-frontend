@@ -39,14 +39,17 @@ const Dashboard = () => {
   const isDark = theme === 'dark';
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchDashboard = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await api.get('/dashboard');
       setData(res.data.data);
     } catch (err) {
       console.error('Error loading dashboard data', err);
+      setError(err.response?.data?.message || err.message || 'Failed to connect to manufacturing server');
     } finally {
       setLoading(false);
     }
@@ -58,6 +61,23 @@ const Dashboard = () => {
 
   if (loading) {
     return <LoadingSpinner message="Calculating factory inventory and manufacturing capacities..." />;
+  }
+
+  if (error && !data) {
+    return (
+      <div className="card card-custom p-5 text-center my-4">
+        <div className="text-danger fs-1 mb-3">
+          <i className="fas fa-circle-exclamation"></i>
+        </div>
+        <h5 className="fw-bold text-dark">Unable to Load Dashboard Data</h5>
+        <p className="text-secondary small mb-3">{error}</p>
+        <div>
+          <button onClick={fetchDashboard} className="btn btn-primary btn-sm px-3">
+            <i className="fas fa-rotate-right me-1"></i> Retry Connection
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const { cards, charts, recentOrders, recentAluActivity, lowStockMaterialsList, capacityHighlights } = data || {};
@@ -177,19 +197,30 @@ const Dashboard = () => {
   return (
     <div className="d-flex flex-column gap-4">
       {/* Page Header */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <div>
-          <h4 className="fw-bold mb-1 text-dark">Manufacturing & Inventory Dashboard</h4>
-          <p className="text-secondary small mb-0">
-            Real-time LED lighting production, multi-warehouse stock balances, and bottleneck analytics
-          </p>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div className="d-flex align-items-center gap-3">
+          <div className="page-header-icon bg-primary text-white shadow-sm">
+            <i className="fas fa-gauge-high"></i>
+          </div>
+          <div>
+            <div className="d-flex align-items-center gap-2 flex-wrap">
+              <h4 className="page-header-title mb-0">Manufacturing & Inventory Dashboard</h4>
+              <span className="badge bg-primary-subtle text-primary border border-primary-subtle">
+                <i className="fas fa-signal fa-xs me-1"></i> Live Production Sync
+              </span>
+            </div>
+            <p className="page-header-subtitle mt-1">
+              Real-time LED lighting production, multi-warehouse stock balances, and bottleneck analytics
+            </p>
+          </div>
         </div>
-        <div className="d-flex align-items-center gap-2">
-          <button onClick={fetchDashboard} className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+
+        <div className="d-flex align-items-center gap-2 flex-wrap">
+          <button onClick={fetchDashboard} className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2 px-3">
             <i className="fas fa-rotate-right"></i>
-            <span>Refresh Data</span>
+            <span>Refresh</span>
           </button>
-          <Link to="/orders" className="btn btn-primary btn-sm d-flex align-items-center gap-1">
+          <Link to="/orders" className="btn btn-primary btn-sm d-flex align-items-center gap-2 px-3 shadow-sm">
             <i className="fas fa-plus"></i>
             <span>New Order</span>
           </Link>
@@ -205,7 +236,7 @@ const Dashboard = () => {
             unit="items"
             icon="fa-boxes-stacked"
             color="primary"
-            subtitle={`${cards?.productsReadyToManufacture} ready to produce`}
+            subtitle={`${cards?.productsReadyToManufacture || 0} ready to produce`}
           />
         </div>
         <div className="col-12 col-sm-6 col-xl-3">
@@ -215,7 +246,7 @@ const Dashboard = () => {
             unit="components"
             icon="fa-cubes"
             color="info"
-            subtitle={`${cards?.lowStockMaterials + cards?.outOfStockMaterials} reorder required`}
+            subtitle={`${(cards?.lowStockMaterials || 0) + (cards?.outOfStockMaterials || 0)} reorder required`}
           />
         </div>
         <div className="col-12 col-sm-6 col-xl-3">
@@ -225,7 +256,7 @@ const Dashboard = () => {
             unit="kg"
             icon="fa-layer-group"
             color="warning"
-            subtitle={`${cards?.aluminium?.availableGm} gm in stock`}
+            subtitle={`${(cards?.aluminium?.availableGm || 0).toLocaleString()} gm in stock`}
           />
         </div>
         <div className="col-12 col-sm-6 col-xl-3">
@@ -233,9 +264,9 @@ const Dashboard = () => {
             title="Warehouse Transfers"
             value={cards?.totalWarehouseTransfers}
             unit="transfers"
-            icon="fa-dolly"
+            icon="fa-dolly-flatbed"
             color="success"
-            subtitle={`${cards?.pendingTransfers} pending approval`}
+            subtitle={`${cards?.pendingTransfers || 0} pending approval`}
           />
         </div>
       </div>
@@ -243,31 +274,70 @@ const Dashboard = () => {
       {/* Secondary KPI Row: Orders & Production Activity */}
       <div className="row g-3">
         <div className="col-6 col-lg-3">
-          <div className="card card-custom p-3">
-            <div className="text-secondary small fw-semibold">Sale Orders</div>
-            <div className="fs-4 fw-bold text-dark mt-1">{cards?.saleOrdersTotal}</div>
-            <div className="text-muted small">{cards?.todaySales} created today</div>
+          <div className="quick-stat-card accent-primary">
+            <div className="quick-stat-header">
+              <span className="quick-stat-title">Sale Orders</span>
+              <div className="quick-stat-icon bg-primary-subtle text-primary">
+                <i className="fas fa-cart-shopping"></i>
+              </div>
+            </div>
+            <div className="quick-stat-value text-dark">{cards?.saleOrdersTotal || 0}</div>
+            <div className="quick-stat-sub">
+              <i className="fas fa-circle-check text-primary fa-xs"></i>
+              <span>{cards?.todaySales || 0} created today</span>
+            </div>
           </div>
         </div>
+
         <div className="col-6 col-lg-3">
-          <div className="card card-custom p-3">
-            <div className="text-secondary small fw-semibold">Purchase Orders</div>
-            <div className="fs-4 fw-bold text-dark mt-1">{cards?.purchaseOrdersTotal}</div>
-            <div className="text-muted small">{cards?.todayPurchases} created today</div>
+          <div className="quick-stat-card accent-info">
+            <div className="quick-stat-header">
+              <span className="quick-stat-title">Purchase Orders</span>
+              <div className="quick-stat-icon bg-info-subtle text-info">
+                <i className="fas fa-truck-ramp-box"></i>
+              </div>
+            </div>
+            <div className="quick-stat-value text-dark">{cards?.purchaseOrdersTotal || 0}</div>
+            <div className="quick-stat-sub">
+              <i className="fas fa-arrow-down text-info fa-xs"></i>
+              <span>{cards?.todayPurchases || 0} created today</span>
+            </div>
           </div>
         </div>
+
         <div className="col-6 col-lg-3">
-          <div className="card card-custom p-3">
-            <div className="text-secondary small fw-semibold">Aluminium Purchased</div>
-            <div className="fs-4 fw-bold text-dark mt-1">{cards?.aluminium?.purchasedKg} <span className="fs-6 fw-normal">kg</span></div>
-            <div className="text-muted small">{cards?.aluminium?.purchasedGm} gm converted</div>
+          <div className="quick-stat-card accent-warning">
+            <div className="quick-stat-header">
+              <span className="quick-stat-title">Aluminium Procured</span>
+              <div className="quick-stat-icon bg-warning-subtle text-warning">
+                <i className="fas fa-scale-balanced"></i>
+              </div>
+            </div>
+            <div className="quick-stat-value text-dark">
+              {cards?.aluminium?.purchasedKg || 0} <span className="fs-6 fw-normal text-muted">kg</span>
+            </div>
+            <div className="quick-stat-sub">
+              <i className="fas fa-cubes-stacked text-warning fa-xs"></i>
+              <span>{(cards?.aluminium?.purchasedGm || 0).toLocaleString()} gm total</span>
+            </div>
           </div>
         </div>
+
         <div className="col-6 col-lg-3">
-          <div className="card card-custom p-3">
-            <div className="text-secondary small fw-semibold">Aluminium Used / Scrap</div>
-            <div className="fs-4 fw-bold text-dark mt-1">{cards?.aluminium?.usedKg} <span className="fs-6 fw-normal">kg</span></div>
-            <div className="text-danger small">{cards?.aluminium?.wastageGm} gm scrap/wastage</div>
+          <div className="quick-stat-card accent-danger">
+            <div className="quick-stat-header">
+              <span className="quick-stat-title">Aluminium Used / Scrap</span>
+              <div className="quick-stat-icon bg-danger-subtle text-danger">
+                <i className="fas fa-fire-burner"></i>
+              </div>
+            </div>
+            <div className="quick-stat-value text-dark">
+              {cards?.aluminium?.usedKg || 0} <span className="fs-6 fw-normal text-muted">kg</span>
+            </div>
+            <div className="quick-stat-sub text-danger">
+              <i className="fas fa-trash-can fa-xs"></i>
+              <span>{(cards?.aluminium?.wastageGm || 0).toLocaleString()} gm scrap</span>
+            </div>
           </div>
         </div>
       </div>
@@ -467,19 +537,34 @@ const Dashboard = () => {
                   {recentOrders && recentOrders.length > 0 ? (
                     recentOrders.map((ord) => (
                       <tr key={ord._id}>
-                        <td className="fw-semibold text-primary">{ord.orderNumber}</td>
+                        <td>
+                          <span className="fw-semibold text-primary font-monospace">{ord.orderNumber}</span>
+                        </td>
                         <td>
                           <span
                             className={`badge ${
-                              ord.orderType === 'PURCHASE' ? 'bg-info-subtle text-info-emphasis' : 'bg-primary-subtle text-primary'
+                              ord.orderType === 'PURCHASE'
+                                ? 'bg-info-subtle text-info border border-info-subtle'
+                                : 'bg-primary-subtle text-primary border border-primary-subtle'
                             }`}
                           >
+                            <i
+                              className={`fas ${
+                                ord.orderType === 'PURCHASE' ? 'fa-arrow-down' : 'fa-arrow-up'
+                              } fa-xs me-1`}
+                            ></i>
                             {ord.orderType}
                           </span>
                         </td>
-                        <td>{new Date(ord.orderDate).toLocaleDateString()}</td>
-                        <td>{ord.warehouse?.name || 'W1'}</td>
-                        <td>{ord.items?.length || 0} line(s)</td>
+                        <td className="text-secondary small">
+                          {new Date(ord.orderDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </td>
+                        <td>
+                          <span className="badge bg-light text-secondary border font-monospace">
+                            {ord.warehouse?.code || 'W1'}
+                          </span>
+                        </td>
+                        <td className="small text-secondary">{ord.items?.length || 0} line(s)</td>
                         <td>
                           <StatusBadge status={ord.status} />
                         </td>
@@ -502,7 +587,15 @@ const Dashboard = () => {
         <div className="col-12 col-lg-5">
           <div className="card card-custom p-3 h-100">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h6 className="fw-bold text-dark mb-0">Low Stock & Reorder Alerts</h6>
+              <div className="d-flex align-items-center gap-2">
+                <div
+                  className="rounded-circle bg-danger-subtle text-danger d-flex align-items-center justify-content-center"
+                  style={{ width: '28px', height: '28px', fontSize: '0.85rem' }}
+                >
+                  <i className="fas fa-triangle-exclamation"></i>
+                </div>
+                <h6 className="fw-bold text-dark mb-0">Low Stock & Reorder Alerts</h6>
+              </div>
               <Link to="/raw-materials" className="btn btn-link btn-sm p-0 text-decoration-none">
                 Materials <i className="fas fa-arrow-right fa-xs ms-1"></i>
               </Link>
@@ -521,11 +614,26 @@ const Dashboard = () => {
                   {lowStockMaterialsList && lowStockMaterialsList.length > 0 ? (
                     lowStockMaterialsList.map((m) => (
                       <tr key={m.id}>
-                        <td className="fw-medium text-truncate" style={{ maxWidth: '150px' }} title={m.name}>
-                          {m.name}
+                        <td>
+                          <div className="d-flex align-items-center">
+                            <div
+                              className="rounded-2 bg-danger-subtle text-danger d-inline-flex align-items-center justify-content-center me-2"
+                              style={{ width: '26px', height: '26px', fontSize: '0.75rem' }}
+                            >
+                              <i className="fas fa-cube"></i>
+                            </div>
+                            <div>
+                              <div className="fw-medium text-dark text-truncate" style={{ maxWidth: '140px' }} title={m.name}>
+                                {m.name}
+                              </div>
+                              <div className="small text-muted font-monospace" style={{ fontSize: '0.7rem' }}>{m.sku}</div>
+                            </div>
+                          </div>
                         </td>
-                        <td className="fw-bold text-danger">{m.currentStock}</td>
-                        <td>{m.reorderPoint}</td>
+                        <td className="fw-bold text-danger">
+                          {m.currentStock} <span className="small fw-normal text-muted">{m.unit}</span>
+                        </td>
+                        <td className="small text-secondary">{m.reorderPoint}</td>
                         <td>
                           <StatusBadge status={m.status} />
                         </td>

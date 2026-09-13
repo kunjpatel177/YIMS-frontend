@@ -92,20 +92,82 @@ const Settings = () => {
   }
 
   return (
-    <div className="d-flex flex-column gap-3" style={{ maxWidth: '900px' }}>
+    <div className="d-flex flex-column gap-3" style={{ maxWidth: 'fit-content' }}>
       {/* Header */}
-      <div>
-        <h4 className="fw-bold mb-1 text-dark">System Configuration & Settings</h4>
-        <p className="text-secondary small mb-0">
-          Manage business profile, units of measure, reorder thresholds, and admin security
-        </p>
+      <div className="d-flex align-items-center gap-3">
+        <div className="page-header-icon bg-primary text-white shadow-sm">
+          <i className="fas fa-sliders"></i>
+        </div>
+        <div>
+          <div className="d-flex align-items-center gap-2">
+            <h4 className="page-header-title mb-0">System Configuration & Settings</h4>
+            <span className="page-context-pill">Control Center</span>
+          </div>
+          <p className="page-header-subtitle mb-0">
+            Manage business identity, units of measure, production defaults, and admin credentials
+          </p>
+        </div>
+      </div>
+
+      {/* Quick Stats Ribbon */}
+      <div className="setting-stats-ribbon flex flex-row justify-between px-4 py-3 rounded-xl">
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-primary-subtle text-primary">
+            <i className="fas fa-building"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val text-truncate" style={{ maxWidth: '180px' }}>
+              {companySettings.companyName || 'Yashvee Enterprise'}
+            </div>
+            <div className="stat-ribbon-lbl">Operating Entity</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-warning-subtle text-warning">
+            <i className="fas fa-scale-balanced"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{companySettings.defaultWeightUnit?.toUpperCase() || 'GM'}</div>
+            <div className="stat-ribbon-lbl">Aluminium Base Unit</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-success-subtle text-success">
+            <i className="fas fa-indian-rupee-sign"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{companySettings.defaultCurrency || 'INR (₹)'}</div>
+            <div className="stat-ribbon-lbl">Base Currency</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-info-subtle text-info">
+            <i className="fas fa-user-shield"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">Super Admin</div>
+            <div className="stat-ribbon-lbl">Access Privileges</div>
+          </div>
+        </div>
       </div>
 
       {/* Company Profile Card */}
       <div className="card card-custom p-4">
-        <h5 className="fw-bold text-dark mb-3">
-          <i className="fas fa-building text-primary me-2"></i> Business & Plant Details
-        </h5>
+        <div className="d-flex align-items-center justify-content-between mb-4">
+          <div className="d-flex align-items-center gap-3">
+            <div className="table-item-avatar bg-primary-subtle text-primary flex-shrink-0" style={{ width: '42px', height: '42px' }}>
+              <i className="fas fa-building fa-lg"></i>
+            </div>
+            <div>
+              <h5 className="fw-bold text-dark mb-0">Business & Plant Details</h5>
+              <div className="small text-secondary">General operational metadata, currency notation, and unit systems</div>
+            </div>
+          </div>
+          <span className="badge bg-light text-secondary border font-monospace">Plant Configuration</span>
+        </div>
 
         <form onSubmit={handleSaveCompanySettings}>
           <div className="row g-3">
@@ -186,9 +248,18 @@ const Settings = () => {
           </div>
 
           <div className="mt-4 pt-3 border-top d-flex justify-content-end">
-            <button type="submit" className="btn btn-primary" disabled={savingSettings}>
-              {savingSettings && <span className="spinner-border spinner-border-sm me-1" role="status"></span>}
-              <span>Save System Settings</span>
+            <button type="submit" className="btn btn-primary px-4 shadow-sm d-flex align-items-center gap-2" disabled={savingSettings}>
+              {savingSettings ? (
+                <>
+                  <span className="spinner-border spinner-border-sm" role="status"></span>
+                  <span>Saving Settings...</span>
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-floppy-disk"></i>
+                  <span>Save System Settings</span>
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -196,12 +267,22 @@ const Settings = () => {
 
       {/* Admin Security Card */}
       <div className="card card-custom p-4">
-        <h5 className="fw-bold text-dark mb-1">
-          <i className="fas fa-lock text-warning me-2"></i> Admin Security & Password
-        </h5>
-        <p className="text-secondary small mb-3">
-          Logged in as: <strong>{user?.name}</strong> ({user?.email})
-        </p>
+        <div className="d-flex align-items-center justify-content-between mb-4">
+          <div className="d-flex align-items-center gap-3">
+            <div className="table-item-avatar bg-danger-subtle text-danger flex-shrink-0" style={{ width: '42px', height: '42px' }}>
+              <i className="fas fa-shield-halved fa-lg"></i>
+            </div>
+            <div>
+              <h5 className="fw-bold text-dark mb-0">Admin Security & Password</h5>
+              <div className="small text-secondary">
+                Logged in as: <strong>{user?.name}</strong> ({user?.email})
+              </div>
+            </div>
+          </div>
+          <span className="badge bg-danger-subtle text-danger border border-danger-subtle">
+            <i className="fas fa-lock me-1"></i> Root Protected
+          </span>
+        </div>
 
         <form onSubmit={handlePasswordChange}>
           <div className="row g-3">
@@ -243,9 +324,18 @@ const Settings = () => {
           </div>
 
           <div className="mt-4 pt-3 border-top d-flex justify-content-end">
-            <button type="submit" className="btn btn-outline-danger" disabled={savingPassword}>
-              {savingPassword && <span className="spinner-border spinner-border-sm me-1" role="status"></span>}
-              <span>Update Password</span>
+            <button type="submit" className="btn btn-outline-danger px-4 d-flex align-items-center gap-2" disabled={savingPassword}>
+              {savingPassword ? (
+                <>
+                  <span className="spinner-border spinner-border-sm" role="status"></span>
+                  <span>Updating Password...</span>
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-key"></i>
+                  <span>Update Password</span>
+                </>
+              )}
             </button>
           </div>
         </form>

@@ -127,15 +127,29 @@ const RawMaterialList = () => {
 
   const exportHeaders = ['SKU', 'Raw Material Name', 'Category', 'Unit', 'Starting Stock', 'Purchased Qty', 'Production Output', 'Current Stock', 'Reorder Threshold', 'Uses Aluminium', 'Alu Req / Unit', 'Reorder Status'];
 
+  // Quick metric counters
+  const totalCount = pagination?.total || materials.length;
+  const normalStockCount = materials.filter(m => m.reorderStatus === 'Normal' || m.reorderStatus === 'Available').length;
+  const lowStockCount = materials.filter(m => m.reorderStatus === 'Low Stock' || m.reorderStatus === 'Out of Stock').length;
+  const aluDerivedCount = materials.filter(m => m.usesAluminium).length;
+
   return (
     <div className="d-flex flex-column gap-3">
       {/* Header */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <div>
-          <h4 className="fw-bold mb-1 text-dark">Raw Materials & Components</h4>
-          <p className="text-secondary small mb-0">
-            Components used in luminaire assemblies with live transaction-backed stock
-          </p>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div className="d-flex align-items-center gap-3">
+          <div className="page-header-icon bg-info text-white shadow-sm">
+            <i className="fas fa-cubes"></i>
+          </div>
+          <div>
+            <div className="d-flex align-items-center gap-2">
+              <h4 className="page-header-title mb-0">Raw Materials & Inventory</h4>
+              <span className="page-context-pill">Components</span>
+            </div>
+            <p className="page-header-subtitle mb-0">
+              Live transaction-backed warehouse stock, aluminium intake requirements, and reorder thresholds
+            </p>
+          </div>
         </div>
         <div className="d-flex align-items-center gap-2">
           <ExportButtons
@@ -144,10 +158,53 @@ const RawMaterialList = () => {
             title="Raw Materials Master Inventory"
             filename="raw_materials_inventory"
           />
-          <button onClick={handleOpenAdd} className="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm">
+          <button onClick={handleOpenAdd} className="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm px-3">
             <i className="fas fa-plus"></i>
             <span>Add Raw Material</span>
           </button>
+        </div>
+      </div>
+
+      {/* Quick Stats Ribbon */}
+      <div className="page-stats-ribbon">
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-info-subtle text-info">
+            <i className="fas fa-boxes-packing"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{totalCount}</div>
+            <div className="stat-ribbon-lbl">Total Components</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-success-subtle text-success">
+            <i className="fas fa-shield-halved"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{normalStockCount}</div>
+            <div className="stat-ribbon-lbl">Stock Healthy</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-danger-subtle text-danger">
+            <i className="fas fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{lowStockCount}</div>
+            <div className="stat-ribbon-lbl">Low / Reorder Alert</div>
+          </div>
+        </div>
+        <div className="stat-ribbon-divider"></div>
+        <div className="stat-ribbon-item">
+          <div className="stat-ribbon-icon bg-warning-subtle text-warning">
+            <i className="fas fa-layer-group"></i>
+          </div>
+          <div>
+            <div className="stat-ribbon-val">{aluDerivedCount}</div>
+            <div className="stat-ribbon-lbl">Aluminium Formed</div>
+          </div>
         </div>
       </div>
 
@@ -258,25 +315,34 @@ const RawMaterialList = () => {
                   <th>Uses Alu</th>
                   <th>Alu Requirement</th>
                   <th>Status</th>
-                  <th className="text-end">Actions</th>
+                  <th className="text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {materials.map((m) => (
                   <tr key={m._id}>
                     <td>
-                      <div className="fw-semibold text-dark">{m.name}</div>
-                      {m.supplier && <div className="small text-muted">Supplier: {m.supplier}</div>}
+                      <div className="d-flex align-items-center gap-2">
+                        <div className="table-item-avatar bg-info-subtle text-info shrink-0">
+                          <i className="fas fa-cube"></i>
+                        </div>
+                        <div>
+                          <div className="fw-semibold text-dark">{m.name}</div>
+                          {m.supplier && <div className="small text-muted">Supplier: {m.supplier}</div>}
+                        </div>
+                      </div>
                     </td>
                     <td>
-                      <span className="badge bg-light text-dark border font-monospace">{m.sku}</span>
+                      <span className="badge-custom bg-light text-dark border font-monospace px-2 py-1">{m.sku}</span>
                     </td>
-                    <td>{m.category}</td>
+                    <td>
+                      <span className="badge bg-secondary-subtle text-secondary px-2 py-1">{m.category}</span>
+                    </td>
                     <td className="text-center">
                       <span className="fw-bold fs-6 text-dark">{m.currentInventory || 0}</span>
                       <span className="small text-muted ms-1">{m.unit}</span>
                     </td>
-                    <td className="text-center text-muted">
+                    <td className="text-center text-muted font-monospace small">
                       {m.reorderPoint}
                     </td>
                     <td>
@@ -290,7 +356,7 @@ const RawMaterialList = () => {
                     </td>
                     <td>
                       {m.usesAluminium ? (
-                        <span className="small fw-semibold text-dark">
+                        <span className="badge-custom bg-amber-subtle text-dark border font-monospace">
                           {m.aluminiumRequiredPerUnit} {m.aluminiumUnit}
                         </span>
                       ) : (
@@ -300,24 +366,24 @@ const RawMaterialList = () => {
                     <td>
                       <StatusBadge status={m.reorderStatus} />
                     </td>
-                    <td className="text-end">
-                      <div className="btn-group btn-group-sm">
+                    <td className="text-center">
+                      <div className="d-flex justify-content-end gap-1">
                         <button
-                          className="btn btn-outline-secondary"
+                          className="table-action-btn"
                           onClick={() => handleOpenDetails(m._id)}
                           title="View Inventory Breakdown & History"
                         >
-                          <i className="fas fa-eye"></i>
+                          <i className="fas fa-eye text-primary"></i>
                         </button>
                         <button
-                          className="btn btn-outline-secondary"
+                          className="table-action-btn"
                           onClick={() => handleOpenEdit(m)}
                           title="Edit Raw Material"
                         >
-                          <i className="fas fa-pencil"></i>
+                          <i className="fas fa-pencil text-secondary"></i>
                         </button>
                         <button
-                          className="btn btn-outline-danger"
+                          className="table-action-btn text-danger"
                           onClick={() => handleOpenDelete(m)}
                           title="Delete Raw Material"
                         >
