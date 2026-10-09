@@ -97,7 +97,7 @@ const GlobalSearchModal = ({ show, onClose }) => {
             <input
               ref={inputRef}
               type="text"
-              className="form-control global-search-input-box p-0 flex-grow-1"
+              className="form-control global-search-input-box py-2 flex-grow-1"
               placeholder="Type to search SKU, products, raw materials, orders, aluminium..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}

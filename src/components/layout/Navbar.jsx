@@ -23,7 +23,7 @@ const Navbar = ({ onToggleSidebar }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Smooth outside click and Escape listener for dropdown
+  // Smooth outside click/tap and Escape listener for dropdown
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -37,10 +37,12 @@ const Navbar = ({ onToggleSidebar }) => {
     };
     if (userDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside, { passive: true });
       window.addEventListener('keydown', handleKeyDown);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [userDropdownOpen]);
@@ -162,6 +164,8 @@ const Navbar = ({ onToggleSidebar }) => {
             {/* Polished Smooth Dropdown Menu */}
             <ul
               className={`dropdown-menu dropdown-menu-end shadow-lg mt-2 ${userDropdownOpen ? 'show' : ''}`}
+              data-bs-popper="static"
+              style={{ right: 0, left: 'auto' }}
               aria-labelledby="userDropdown"
             >
               <li className="px-3 py-2 border-bottom">
