@@ -44,7 +44,7 @@ const AluminiumHub = () => {
   // Load Raw Materials that use aluminium
   const fetchAluminiumMaterials = async () => {
     try {
-      const res = await api.get('/raw-materials?usesAluminium=true&limit=300');
+      const res = await api.get('/raw-materials?usesAluminium=true&limit=300&light=true');
       setMaterials(res.data.data);
       if (res.data.data.length > 0 && !selectedMaterialId) {
         setSelectedMaterialId(res.data.data[0]._id);

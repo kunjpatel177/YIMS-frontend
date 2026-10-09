@@ -36,8 +36,8 @@ const OrderCreateModal = ({ show, initialType = 'SALE', onClose, onSuccess }) =>
         try {
           const [whRes, prodRes, rmRes] = await Promise.all([
             api.get('/warehouses'),
-            api.get('/products?limit=300'),
-            api.get('/raw-materials?limit=300')
+            api.get('/products?limit=300&light=true'),
+            api.get('/raw-materials?limit=300&light=true')
           ]);
           setWarehouses(whRes.data.data);
           if (whRes.data.data.length > 0) {

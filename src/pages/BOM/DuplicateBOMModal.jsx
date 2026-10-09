@@ -13,7 +13,7 @@ const DuplicateBOMModal = ({ show, sourceProductId, onClose, onSuccess }) => {
       setSourceId(sourceProductId || '');
       const fetchProducts = async () => {
         try {
-          const res = await api.get('/products?limit=300');
+          const res = await api.get('/products?limit=300&light=true');
           setProducts(res.data.data);
         } catch (err) {
           console.error('Error fetching products', err);

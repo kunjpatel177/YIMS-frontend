@@ -17,6 +17,20 @@ export default defineConfig(({ mode }) => {
           secure: false
         }
       }
+    },
+    build: {
+      target: 'es2020',
+      cssCodeSplit: true,
+      chunkSizeWarningLimit: 800,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+            'chart-vendor': ['chart.js', 'react-chartjs-2'],
+            'ui-vendor': ['axios', 'react-toastify']
+          }
+        }
+      }
     }
   };
 });

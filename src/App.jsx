@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -7,19 +7,19 @@ import { useAuth } from './context/AuthContext';
 import Layout from './components/layout/Layout';
 import LoadingSpinner from './components/common/LoadingSpinner';
 
-// Pages
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import ProductList from './pages/Products/ProductList';
-import RawMaterialList from './pages/RawMaterials/RawMaterialList';
-import BOMList from './pages/BOM/BOMList';
-import OrdersHub from './pages/Orders/OrdersHub';
-import AluminiumHub from './pages/Aluminium/AluminiumHub';
-import WarehouseInventory from './pages/Warehouse/WarehouseInventory';
-import TransferList from './pages/WarehouseTransfers/TransferList';
-import ReportsHub from './pages/Reports/ReportsHub';
-import Settings from './pages/Settings/Settings';
-import NotFound from './pages/NotFound';
+// Lazy-loaded Pages for fast initial bundle load
+const Login = lazy(() => import('./pages/Login'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const ProductList = lazy(() => import('./pages/Products/ProductList'));
+const RawMaterialList = lazy(() => import('./pages/RawMaterials/RawMaterialList'));
+const BOMList = lazy(() => import('./pages/BOM/BOMList'));
+const OrdersHub = lazy(() => import('./pages/Orders/OrdersHub'));
+const AluminiumHub = lazy(() => import('./pages/Aluminium/AluminiumHub'));
+const WarehouseInventory = lazy(() => import('./pages/Warehouse/WarehouseInventory'));
+const TransferList = lazy(() => import('./pages/WarehouseTransfers/TransferList'));
+const ReportsHub = lazy(() => import('./pages/Reports/ReportsHub'));
+const Settings = lazy(() => import('./pages/Settings/Settings'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -39,8 +39,15 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <>
-      <Routes>
-        <Route path="/login" element={<Login />} />
+      <Suspense
+        fallback={
+          <div className="min-vh-100 d-flex align-items-center justify-content-center">
+            <LoadingSpinner message="Loading application..." />
+          </div>
+        }
+      >
+        <Routes>
+          <Route path="/login" element={<Login />} />
 
         {/* Protected Dashboard Layout */}
         <Route
@@ -64,6 +71,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
+      </Suspense>
 
       <ToastContainer
         position="top-right"

@@ -21,7 +21,7 @@ const ConfirmModal = ({
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content shadow">
-          <div className="modal-header flex-shrink-0">
+          <div className="modal-header shrink-0">
             <h5 className="modal-title fw-semibold">{title}</h5>
             <button
               type="button"
@@ -34,7 +34,7 @@ const ConfirmModal = ({
           <div className="modal-body">
             <p className="text-secondary mb-0">{message}</p>
           </div>
-          <div className="modal-footer flex-shrink-0">
+          <div className="modal-footer shrink-0">
             <button
               type="button"
               className="btn btn-light"

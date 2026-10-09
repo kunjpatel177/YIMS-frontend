@@ -37,7 +37,7 @@ const BOMList = () => {
   // Load products list for dropdown
   const loadProducts = async () => {
     try {
-      const res = await api.get('/products?limit=300&sortBy=name&sortOrder=asc');
+      const res = await api.get('/products?limit=300&sortBy=name&sortOrder=asc&light=true');
       setProducts(res.data.data);
       if (res.data.data.length > 0 && !selectedProductId) {
         setSelectedProductId(res.data.data[0]._id);

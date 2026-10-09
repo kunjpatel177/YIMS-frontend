@@ -18,8 +18,8 @@ const BOMModal = ({ show, bomItem, defaultProductId, onClose, onSuccess }) => {
     const loadSelects = async () => {
       try {
         const [prodRes, rmRes] = await Promise.all([
-          api.get('/products?limit=300'),
-          api.get('/raw-materials?limit=300')
+          api.get('/products?limit=300&light=true'),
+          api.get('/raw-materials?limit=300&light=true')
         ]);
         setProducts(prodRes.data.data);
         setMaterials(rmRes.data.data);

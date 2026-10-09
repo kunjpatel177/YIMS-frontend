@@ -31,8 +31,8 @@ const TransferCreateModal = ({ show, onClose, onSuccess }) => {
         try {
           const [whRes, prodRes, rmRes] = await Promise.all([
             api.get('/warehouses'),
-            api.get('/products?limit=500'),
-            api.get('/raw-materials?limit=500')
+            api.get('/products?limit=500&light=true'),
+            api.get('/raw-materials?limit=500&light=true')
           ]);
           setWarehouses(whRes.data.data);
           if (whRes.data.data.length >= 2) {

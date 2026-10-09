@@ -1,7 +1,3 @@
-import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-
 /**
  * Export data array to CSV
  */
@@ -34,14 +30,15 @@ export const exportToCSV = (data, filename = 'export.csv') => {
 };
 
 /**
- * Export data array to Excel (.xlsx) using SheetJS
+ * Export data array to Excel (.xlsx) using SheetJS (loaded on demand)
  */
-export const exportToExcel = (data, filename = 'export.xlsx', sheetName = 'Sheet 1') => {
+export const exportToExcel = async (data, filename = 'export.xlsx', sheetName = 'Sheet 1') => {
   if (!data || !data.length) {
     alert('No data available to export');
     return;
   }
 
+  const XLSX = await import('xlsx');
   const worksheet = XLSX.utils.json_to_sheet(data);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
@@ -49,13 +46,18 @@ export const exportToExcel = (data, filename = 'export.xlsx', sheetName = 'Sheet
 };
 
 /**
- * Export tabular data to PDF using jsPDF and autoTable
+ * Export tabular data to PDF using jsPDF and autoTable (loaded on demand)
  */
-export const exportToPDF = (headers, rows, title = 'Report', filename = 'export.pdf') => {
+export const exportToPDF = async (headers, rows, title = 'Report', filename = 'export.pdf') => {
   if (!rows || !rows.length) {
     alert('No data available to export');
     return;
   }
+
+  const [{ default: jsPDF }] = await Promise.all([
+    import('jspdf'),
+    import('jspdf-autotable')
+  ]);
 
   const doc = new jsPDF({ orientation: 'landscape' });
 

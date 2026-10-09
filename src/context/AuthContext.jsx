@@ -9,7 +9,12 @@ export const AuthProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : null;
   });
   const [token, setToken] = useState(() => localStorage.getItem('yims_token') || null);
-  const [loading, setLoading] = useState(true);
+  // Optimistically render immediately if token & user are already in localStorage; verify in background
+  const [loading, setLoading] = useState(() => {
+    const hasToken = !!localStorage.getItem('yims_token');
+    const hasUser = !!localStorage.getItem('yims_user');
+    return hasToken && !hasUser;
+  });
 
   useEffect(() => {
     const verifyUser = async () => {
